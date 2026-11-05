@@ -2,7 +2,7 @@ import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 
 import type { SeriesPoint, TeamRef } from '../../api/types'
 import { formatNumber, formatShortDate, teamLabel } from '../../lib/format'
-import { AXIS, SERIES } from './chartTheme'
+import { AXIS, legendText, SERIES } from './chartTheme'
 import { TooltipBox } from './ChartTooltip'
 
 interface Props {
@@ -42,7 +42,7 @@ export function XgTrendChart({ points, teams }: Props) {
               )
             }}
           />
-          <Legend wrapperStyle={{ fontSize: 12, color: 'var(--color-ink-muted)' }} iconType="plainline" />
+          <Legend wrapperStyle={{ fontSize: 12 }} iconType="plainline" formatter={(v: string) => <span style={{ color: legendText(v).color }}>{v}</span>} />
           <Line name="xG creati" dataKey="xg" stroke={SERIES.one} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} connectNulls={false} isAnimationActive={false} />
           <Line name="xG concessi" dataKey="xga" stroke={SERIES.two} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} connectNulls={false} isAnimationActive={false} />
           <Line name="Media creati (3)" dataKey="xg_rolling" stroke={SERIES.one} strokeWidth={1.5} strokeDasharray="4 3" dot={false} legendType="none" isAnimationActive={false} />

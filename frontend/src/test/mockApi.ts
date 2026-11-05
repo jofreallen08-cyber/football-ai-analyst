@@ -70,16 +70,34 @@ export const fixtures: Record<string, unknown> = {
     stats: { matches: 1, metrics: [], missing: ['xG: non disponibile dalla fonte'] }, xg_series: [], has_xg: false,
     missing: ['xG non disponibile per questa competizione'],
   },
+  '/simulations': [],
+  '/simulations/options': {
+    season_id: 20, home_team: H, away_team: A, home_usual_formation: '4-3-3', away_usual_formation: '4-4-2',
+    formations: ['4-3-3', '4-4-2', '5-4-1'], as_of: '2026-01-10T17:00:00Z',
+    home_players: [{ player_id: 7, name: 'Mario Bomber', position: 'FWD', minutes: 900, minutes_share: 0.9, xg_share: 0.4, reported_unavailable: true }],
+    away_players: [],
+  },
+  'POST /simulations': {
+    id: 'sim-1', is_simulation: true, label: 'SIMULAZIONE — scenario ipotetico, non un risultato reale né garantito',
+    created_at: '2026-11-05T10:00:00Z', match_id: 100, season_id: 20, home_team: H, away_team: A, venue: 'home',
+    model_version: 'poisson-v1', seed: 2026, n_iterations: 20000,
+    training_window: { matches_used: 50, start: '2026-08-22T00:00:00Z', end: '2026-10-31T00:00:00Z', as_of: '2026-11-07T00:00:00Z', uses_xg: true, home_matches: 10, away_matches: 10 },
+    strengths: { home: { attack: 1.2, defence: 0.9 }, away: { attack: 0.9, defence: 1.1 } },
+    baseline: { expected_goals_home: 1.8, expected_goals_away: 1.0, home_win_share: 0.55, draw_share: 0.24, away_win_share: 0.21, mean_goals_home: 1.8, mean_goals_away: 1, home_clean_sheet_share: 0.37, away_clean_sheet_share: 0.17, both_score_share: 0.52, top_scorelines: [['1-0', 0.12], ['2-1', 0.1]], goals_distribution_home: [0.17, 0.3, 0.27, 0.16, 0.07, 0.02, 0.01], goals_distribution_away: [0.37, 0.37, 0.18, 0.06, 0.02, 0, 0] },
+    scenario: null, scenario_description: {}, assumptions: ['Modello poisson-v1: forze calcolate su 50 partite.'],
+    limitations: ['Le percentuali sono frequenze sulle simulazioni eseguite.'], is_synthetic_data: true,
+  },
   '/seasons/10/player-leaders': { season: {}, metric: 'goals', per90: false, min_minutes_per90: 270, items: [] },
 }
 
 /** Install a fetch mock that answers by API path; `overrides` replace or fail specific paths. */
 export function mockApi(overrides: Record<string, unknown | Error> = {}) {
   const table = { ...fixtures, ...overrides }
-  const fn = vi.fn(async (input: RequestInfo | URL) => {
+  const fn = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input), 'http://localhost')
     const path = url.pathname.replace(/^\/api\/v1/, '')
-    const body = table[path]
+    const method = init?.method ?? 'GET'
+    const body = method === 'GET' ? table[path] : table[`${method} ${path}`]
     if (body instanceof Error) throw body
     if (body === undefined) {
       return new Response(JSON.stringify({ title: 'Risorsa non trovata', status: 404, detail: 'Non trovato' }), { status: 404 })

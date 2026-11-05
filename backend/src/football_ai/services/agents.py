@@ -110,6 +110,7 @@ def _empty_report(
         model=llm.model,
         prompt_version=agent.prompt_version,
         error=reason if status == "failed" else None,
+        is_simulation=agent.is_simulation,
     )
 
 
@@ -122,7 +123,8 @@ async def run_agent(
     *,
     analysis_run_id: uuid.UUID | None = None,
 ) -> AgentReport:
-    evidence = agent.build_evidence(ctx)
+    extra = agent.prepare(session, ctx)
+    evidence = agent.build_evidence(ctx, extra)
     missing = agent.known_missing(ctx)
     key = make_cache_key(
         agent=agent.name,
@@ -134,7 +136,7 @@ async def run_agent(
     )
     store = _Target(ctx.match.id, key, analysis_run_id)
 
-    reason = agent.skip_reason(ctx, evidence)
+    reason = agent.skip_reason(ctx, evidence, extra)
     if reason:
         log.info("agent_skipped", agent=agent.name, reason=reason)
         return _store(session, _empty_report(agent, llm, ctx, "skipped", reason), store, 0)
@@ -224,10 +226,13 @@ async def run_agent(
             output_tokens=result.output_tokens,
             request_id=result.request_id,
         )
+        headline = output.headline
+        if agent.is_simulation and not headline.upper().startswith("SIMULAZIONE"):
+            headline = f"SIMULAZIONE — {headline}"
         report = AgentReport(
             agent=agent.name,
             status="completed",
-            headline=output.headline,
+            headline=headline,
             findings=kept,
             missing_information=sorted(set(output.missing_information) | set(missing)),
             confidence=output.confidence,
@@ -237,6 +242,7 @@ async def run_agent(
             model=result.model,
             prompt_version=agent.prompt_version,
             rejected_findings=rejected,
+            is_simulation=agent.is_simulation,
         )
         cache_put(
             session,

@@ -39,11 +39,13 @@ export function qs(params: Record<string, QueryValue>): string {
   return out ? `?${out}` : ''
 }
 
-export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   let response: Response
   try {
     response = await fetch(`${API_BASE}/api/v1${path}`, {
-      headers: { Accept: 'application/json' },
+      method,
+      headers: body === undefined ? { Accept: 'application/json' } : { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
       signal,
     })
   } catch (err) {
@@ -58,7 +60,16 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
     } catch {
       problem = null
     }
-    throw new ApiError(response.status, problem?.title ?? `Errore HTTP ${response.status}`, problem)
+    const detail = typeof problem?.detail === 'string' ? problem.detail : undefined
+    throw new ApiError(response.status, detail ?? problem?.title ?? `Errore HTTP ${response.status}`, problem)
   }
   return (await response.json()) as T
+}
+
+export function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
+  return request<T>('GET', path, undefined, signal)
+}
+
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return request<T>('POST', path, body)
 }

@@ -34,7 +34,9 @@ class MatchAnalystAgent(BaseAgent):
     name = "match_analyst"
     title = "Match Analyst"
 
-    def build_evidence(self, ctx: MatchContext) -> dict[str, Any]:
+    def build_evidence(
+        self, ctx: MatchContext, extra: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         h2h = ctx.head_to_head
         return {
             **self.meta(ctx),
@@ -48,7 +50,9 @@ class MatchAnalystAgent(BaseAgent):
             "h2h.away_team_goals": h2h.team_b_goals if h2h.sample_size else None,
         }
 
-    def skip_reason(self, ctx: MatchContext, evidence: dict[str, Any]) -> str | None:
+    def skip_reason(
+        self, ctx: MatchContext, evidence: dict[str, Any], extra: dict[str, Any] | None = None
+    ) -> str | None:
         if (
             ctx.home.form_last5.sample_size == 0
             and ctx.away.form_last5.sample_size == 0

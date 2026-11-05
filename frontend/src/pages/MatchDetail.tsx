@@ -1,4 +1,4 @@
-import { ArrowLeft, Info } from 'lucide-react'
+import { ArrowLeft, FlaskConical, Info } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 
 import { useMatch, useMatchContext } from '../api/queries'
@@ -88,9 +88,16 @@ export function MatchDetail() {
 
   return (
     <div className="space-y-5">
-      <Link to="/partite" className="inline-flex items-center gap-1 text-sm text-accent hover:underline">
-        <ArrowLeft className="size-4" /> Centro Partite
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link to="/partite" className="inline-flex items-center gap-1 text-sm text-accent hover:underline">
+          <ArrowLeft className="size-4" /> Centro Partite
+        </Link>
+        {matchId && (
+          <Link to={`/simulazioni?partita=${matchId}`} className="inline-flex items-center gap-1.5 rounded-md border border-sim/50 px-3 py-1.5 text-sm text-sim hover:bg-sim/10">
+            <FlaskConical className="size-4" /> Simula questa partita
+          </Link>
+        )}
+      </div>
       <QueryState query={match} rows={6}>
         {(m) => {
           const [hs, as] = [m.team_stats.find((s) => s.is_home), m.team_stats.find((s) => !s.is_home)]

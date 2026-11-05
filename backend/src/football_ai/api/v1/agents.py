@@ -22,7 +22,7 @@ def get_llm(settings: Annotated[Settings, Depends(get_settings)]) -> LLMProvider
     return build_llm(settings)
 
 
-AgentName = Literal["match_analyst", "statistics", "team_intelligence"]
+AgentName = Literal["match_analyst", "statistics", "team_intelligence", "simulation"]
 
 
 @router.post(

@@ -276,10 +276,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/matches/{match_id}/agents/{agent}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Esegue un singolo agente sulla partita (con cache) */
+        post: operations["run_single_agent_api_v1_matches__match_id__agents__agent__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Storico simulazioni */
+        get: operations["list__api_v1_simulations_get"];
+        put?: never;
+        /** Esegue una simulazione */
+        post: operations["create_api_v1_simulations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulations/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Giocatori e moduli per gli scenari */
+        get: operations["options__api_v1_simulations_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulations/{simulation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dettaglio simulazione */
+        get: operations["get_api_v1_simulations__simulation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AgentReport
+         * @description Validated, stored report (model output + metadata added by the application).
+         */
+        AgentReport: {
+            /** Headline */
+            headline: string;
+            /** Findings */
+            findings: components["schemas"]["Finding"][];
+            /** Missing Information */
+            missing_information: string[];
+            /**
+             * Confidence
+             * @enum {string}
+             */
+            confidence: "low" | "medium" | "high";
+            /** Limitations */
+            limitations: string[];
+            /** Agent */
+            agent: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "cached" | "skipped" | "failed";
+            /** Sources */
+            sources: string[];
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Prompt Version */
+            prompt_version: string;
+            /**
+             * Rejected Findings
+             * @default 0
+             */
+            rejected_findings: number;
+            /**
+             * Is Simulation
+             * @default false
+             */
+            is_simulation: boolean;
+            /** Error */
+            error?: string | null;
+        };
         /** AvailabilityItem */
         AvailabilityItem: {
             /** Player Id */
@@ -339,6 +454,18 @@ export interface components {
             competition_name: string;
             /** Competition Code */
             competition_code: string;
+        };
+        /** Finding */
+        Finding: {
+            /** Claim */
+            claim: string;
+            /** Evidence Keys */
+            evidence_keys: string[];
+            /**
+             * Strength
+             * @enum {string}
+             */
+            strength: "low" | "medium" | "high";
         };
         /** FormMatch */
         FormMatch: {
@@ -457,6 +584,25 @@ export interface components {
             warnings: number;
             /** Error */
             error: string | null;
+        };
+        /** KeyPlayer */
+        KeyPlayer: {
+            /** Player Id */
+            player_id: number;
+            /** Name */
+            name: string;
+            /** Position */
+            position: string | null;
+            /** Minutes */
+            minutes: number;
+            /** Goals */
+            goals: number | null;
+            /** Assists */
+            assists: number | null;
+            /** Xg */
+            xg: number | null;
+            /** Xa */
+            xa: number | null;
         };
         /** LastLineup */
         LastLineup: {
@@ -640,6 +786,38 @@ export interface components {
             /** Lower Is Better */
             lower_is_better: boolean;
         };
+        /** Outcome */
+        Outcome: {
+            /** Expected Goals Home */
+            expected_goals_home: number;
+            /** Expected Goals Away */
+            expected_goals_away: number;
+            /** Home Win Share */
+            home_win_share: number;
+            /** Draw Share */
+            draw_share: number;
+            /** Away Win Share */
+            away_win_share: number;
+            /** Mean Goals Home */
+            mean_goals_home: number;
+            /** Mean Goals Away */
+            mean_goals_away: number;
+            /** Home Clean Sheet Share */
+            home_clean_sheet_share: number;
+            /** Away Clean Sheet Share */
+            away_clean_sheet_share: number;
+            /** Both Score Share */
+            both_score_share: number;
+            /** Top Scorelines */
+            top_scorelines: [
+                string,
+                number
+            ][];
+            /** Goals Distribution Home */
+            goals_distribution_home: number[];
+            /** Goals Distribution Away */
+            goals_distribution_away: number[];
+        };
         /** OverviewOut */
         OverviewOut: {
             /** Totals */
@@ -754,6 +932,23 @@ export interface components {
             /** Shots */
             shots: number | null;
         };
+        /** PlayerOption */
+        PlayerOption: {
+            /** Player Id */
+            player_id: number;
+            /** Name */
+            name: string;
+            /** Position */
+            position: string | null;
+            /** Minutes */
+            minutes: number;
+            /** Minutes Share */
+            minutes_share: number | null;
+            /** Xg Share */
+            xg_share: number | null;
+            /** Reported Unavailable */
+            reported_unavailable: boolean;
+        };
         /** PlayerOut */
         PlayerOut: {
             /** Id */
@@ -845,6 +1040,147 @@ export interface components {
             xg_rolling: number | null;
             /** Xga Rolling */
             xga_rolling: number | null;
+        };
+        /** SimulationOptions */
+        SimulationOptions: {
+            /** Season Id */
+            season_id: number;
+            home_team: components["schemas"]["TeamRef"];
+            away_team: components["schemas"]["TeamRef"];
+            /** Home Usual Formation */
+            home_usual_formation: string | null;
+            /** Away Usual Formation */
+            away_usual_formation: string | null;
+            /** Formations */
+            formations: string[];
+            /** Home Players */
+            home_players: components["schemas"]["PlayerOption"][];
+            /** Away Players */
+            away_players: components["schemas"]["PlayerOption"][];
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+        };
+        /** SimulationOut */
+        SimulationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Is Simulation
+             * @default true
+             * @constant
+             */
+            is_simulation: true;
+            /**
+             * Label
+             * @default SIMULAZIONE — scenario ipotetico, non un risultato reale né garantito
+             */
+            label: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Match Id */
+            match_id: number | null;
+            /** Season Id */
+            season_id: number;
+            home_team: components["schemas"]["TeamRef"];
+            away_team: components["schemas"]["TeamRef"];
+            /** Venue */
+            venue: string;
+            /** Model Version */
+            model_version: string;
+            /** Seed */
+            seed: number;
+            /** N Iterations */
+            n_iterations: number;
+            training_window: components["schemas"]["TrainingWindow"];
+            /** Strengths */
+            strengths: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            baseline: components["schemas"]["Outcome"];
+            scenario: components["schemas"]["Outcome"] | null;
+            /** Scenario Description */
+            scenario_description: {
+                [key: string]: unknown;
+            };
+            /** Assumptions */
+            assumptions: string[];
+            /** Limitations */
+            limitations: string[];
+            /** Is Synthetic Data */
+            is_synthetic_data: boolean;
+        };
+        /** SimulationRequest */
+        SimulationRequest: {
+            /** Season Id */
+            season_id?: number | null;
+            /** Home Team Id */
+            home_team_id?: number | null;
+            /** Away Team Id */
+            away_team_id?: number | null;
+            /** Match Id */
+            match_id?: number | null;
+            /**
+             * Venue
+             * @default home
+             * @enum {string}
+             */
+            venue: "home" | "neutral" | "swapped";
+            /** Unavailable Player Ids */
+            unavailable_player_ids?: number[];
+            /** Home Formation */
+            home_formation?: string | null;
+            /** Away Formation */
+            away_formation?: string | null;
+            /**
+             * Seed
+             * @default 2026
+             */
+            seed: number;
+            /**
+             * N Iterations
+             * @default 20000
+             */
+            n_iterations: number;
+        };
+        /** SimulationSummary */
+        SimulationSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            home_team: components["schemas"]["TeamRef"];
+            away_team: components["schemas"]["TeamRef"];
+            /** Venue */
+            venue: string;
+            /** Seed */
+            seed: number;
+            /** N Iterations */
+            n_iterations: number;
+            /** Has Scenario */
+            has_scenario: boolean;
+            /** Home Win Share */
+            home_win_share: number;
+            /** Draw Share */
+            draw_share: number;
+            /** Away Win Share */
+            away_win_share: number;
         };
         /** SourceOut */
         SourceOut: {
@@ -977,6 +1313,12 @@ export interface components {
             formation_usage: {
                 [key: string]: number;
             };
+            /**
+             * Key Players
+             * @default []
+             */
+            key_players: components["schemas"]["KeyPlayer"][];
+            confirmed_lineup?: components["schemas"]["LastLineup"] | null;
         };
         /** TeamDetail */
         TeamDetail: {
@@ -1053,6 +1395,26 @@ export interface components {
             pass_accuracy_pct: number | null;
             /** Offsides */
             offsides: number | null;
+        };
+        /** TrainingWindow */
+        TrainingWindow: {
+            /** Matches Used */
+            matches_used: number;
+            /** Start */
+            start: string | null;
+            /** End */
+            end: string | null;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** Uses Xg */
+            uses_xg: boolean;
+            /** Home Matches */
+            home_matches: number;
+            /** Away Matches */
+            away_matches: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1541,6 +1903,168 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MatchContext"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_single_agent_api_v1_matches__match_id__agents__agent__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: number;
+                agent: "match_analyst" | "statistics" | "team_intelligence" | "simulation";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list__api_v1_simulations_get: {
+        parameters: {
+            query?: {
+                /** @description Numero massimo di elementi */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_v1_simulations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    options__api_v1_simulations_options_get: {
+        parameters: {
+            query?: {
+                match_id?: number | null;
+                season_id?: number | null;
+                home_team_id?: number | null;
+                away_team_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationOptions"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_api_v1_simulations__simulation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                simulation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationOut"];
                 };
             };
             /** @description Validation Error */

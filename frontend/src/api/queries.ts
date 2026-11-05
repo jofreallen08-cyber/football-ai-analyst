@@ -1,6 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { apiGet, qs } from './client'
+import { apiGet, apiPost, qs } from './client'
 import type {
   Competition,
   MatchContext,
@@ -10,6 +10,10 @@ import type {
   Page,
   PlayerAnalytics,
   PlayerLeaders,
+  Simulation,
+  SimulationOptions,
+  SimulationRequest,
+  SimulationSummary,
   Standings,
   Team,
   TeamAnalytics,
@@ -108,5 +112,41 @@ export function usePlayerAnalytics(playerId: number | undefined, seasonId: numbe
     queryFn: ({ signal }) =>
       apiGet<PlayerAnalytics>(`/players/${playerId}/analytics${qs({ season_id: seasonId })}`, signal),
     enabled: playerId !== undefined && seasonId !== undefined,
+  })
+}
+
+export function useSimulationOptions(params: { match_id?: number; season_id?: number; home_team_id?: number; away_team_id?: number }) {
+  const ready = params.match_id !== undefined || (params.season_id !== undefined && params.home_team_id !== undefined && params.away_team_id !== undefined && params.home_team_id !== params.away_team_id)
+  return useQuery({
+    queryKey: ['simulation-options', params],
+    queryFn: ({ signal }) => apiGet<SimulationOptions>(`/simulations/options${qs({ ...params })}`, signal),
+    enabled: ready,
+  })
+}
+
+export function useSimulationHistory() {
+  return useQuery({
+    queryKey: ['simulations'],
+    queryFn: ({ signal }) => apiGet<SimulationSummary[]>('/simulations?limit=10', signal),
+  })
+}
+
+export function useSimulation(id: string | undefined) {
+  return useQuery({
+    queryKey: ['simulation', id],
+    queryFn: ({ signal }) => apiGet<Simulation>(`/simulations/${id}`, signal),
+    enabled: id !== undefined,
+    staleTime: Infinity,
+  })
+}
+
+export function useRunSimulation() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: SimulationRequest) => apiPost<Simulation>('/simulations', body),
+    onSuccess: (sim) => {
+      client.setQueryData(['simulation', sim.id], sim)
+      void client.invalidateQueries({ queryKey: ['simulations'] })
+    },
   })
 }

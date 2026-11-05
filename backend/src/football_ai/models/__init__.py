@@ -38,6 +38,7 @@ from football_ai.models.provenance import (
     IssueSeverity,
     ProviderCache,
 )
+from football_ai.models.simulation import SimulationRun
 
 __all__ = [
     "AICache",
@@ -69,6 +70,7 @@ __all__ = [
     "ProviderCache",
     "RunStatus",
     "Season",
+    "SimulationRun",
     "SquadMembership",
     "Team",
     "TeamAlias",

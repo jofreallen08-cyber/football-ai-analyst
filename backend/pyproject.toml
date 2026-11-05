@@ -36,7 +36,10 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF"]
-ignore = ["S101"]
+ignore = ["S101", "RUF001", "RUF002", "RUF003"]  # typographic characters are intended in Italian text
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120  # long Italian user-facing strings; formatter still wraps code at 100
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S"]

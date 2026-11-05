@@ -41,7 +41,9 @@ class TeamIntelligenceAgent(BaseAgent):
     name = "team_intelligence"
     title = "Team Intelligence"
 
-    def build_evidence(self, ctx: MatchContext) -> dict[str, Any]:
+    def build_evidence(
+        self, ctx: MatchContext, extra: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         return {
             **self.meta(ctx),
             "meta.availability_source": ctx.capabilities.get("availability", False),
@@ -50,7 +52,9 @@ class TeamIntelligenceAgent(BaseAgent):
             **_team("away", ctx.away),
         }
 
-    def skip_reason(self, ctx: MatchContext, evidence: dict[str, Any]) -> str | None:
+    def skip_reason(
+        self, ctx: MatchContext, evidence: dict[str, Any], extra: dict[str, Any] | None = None
+    ) -> str | None:
         if not ctx.capabilities.get("availability") and not ctx.capabilities.get("lineups"):
             return (
                 "Nessuna fonte verificata su indisponibilità e formazioni per questa competizione."

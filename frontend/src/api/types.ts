@@ -28,6 +28,13 @@ export type PlayerAnalytics = S['PlayerAnalytics']
 export type MatchContext = S['MatchContext']
 export type TeamContext = S['TeamContext']
 export type AvailabilityItem = S['AvailabilityItem']
+export type SimulationRequest = S['SimulationRequest']
+export type Simulation = S['SimulationOut']
+export type SimulationOutcome = S['Outcome']
+export type SimulationSummary = S['SimulationSummary']
+export type SimulationOptions = S['SimulationOptions']
+export type PlayerOption = S['PlayerOption']
+export type AgentReport = S['AgentReport']
 
 export interface Page<T> {
   items: T[]

@@ -934,10 +934,417 @@
      }
     }
    }
+  },
+  "/api/v1/matches/{match_id}/agents/{agent}": {
+   "post": {
+    "tags": [
+     "agenti AI"
+    ],
+    "summary": "Esegue un singolo agente sulla partita (con cache)",
+    "operationId": "run_single_agent_api_v1_matches__match_id__agents__agent__post",
+    "parameters": [
+     {
+      "name": "match_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "maximum": 4611686018427387904,
+       "minimum": 1,
+       "title": "Match Id"
+      }
+     },
+     {
+      "name": "agent",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "enum": [
+        "match_analyst",
+        "statistics",
+        "team_intelligence",
+        "simulation"
+       ],
+       "type": "string",
+       "title": "Agent"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AgentReport"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/simulations": {
+   "post": {
+    "tags": [
+     "laboratorio simulazioni"
+    ],
+    "summary": "Esegue una simulazione",
+    "operationId": "create_api_v1_simulations_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SimulationRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SimulationOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "laboratorio simulazioni"
+    ],
+    "summary": "Storico simulazioni",
+    "operationId": "list__api_v1_simulations_get",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 1,
+       "description": "Numero massimo di elementi",
+       "default": 20,
+       "title": "Limit"
+      },
+      "description": "Numero massimo di elementi"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/SimulationSummary"
+         },
+         "title": "Response List  Api V1 Simulations Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/simulations/options": {
+   "get": {
+    "tags": [
+     "laboratorio simulazioni"
+    ],
+    "summary": "Giocatori e moduli per gli scenari",
+    "operationId": "options__api_v1_simulations_options_get",
+    "parameters": [
+     {
+      "name": "match_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4611686018427387904,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Match Id"
+      }
+     },
+     {
+      "name": "season_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4611686018427387904,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Season Id"
+      }
+     },
+     {
+      "name": "home_team_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4611686018427387904,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Home Team Id"
+      }
+     },
+     {
+      "name": "away_team_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4611686018427387904,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Away Team Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SimulationOptions"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/simulations/{simulation_id}": {
+   "get": {
+    "tags": [
+     "laboratorio simulazioni"
+    ],
+    "summary": "Dettaglio simulazione",
+    "operationId": "get_api_v1_simulations__simulation_id__get",
+    "parameters": [
+     {
+      "name": "simulation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Simulation Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SimulationOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
   "schemas": {
+   "AgentReport": {
+    "properties": {
+     "headline": {
+      "type": "string",
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Headline"
+     },
+     "findings": {
+      "items": {
+       "$ref": "#/components/schemas/Finding"
+      },
+      "type": "array",
+      "title": "Findings"
+     },
+     "missing_information": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Missing Information"
+     },
+     "confidence": {
+      "type": "string",
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "title": "Confidence"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Limitations"
+     },
+     "agent": {
+      "type": "string",
+      "title": "Agent"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "completed",
+       "cached",
+       "skipped",
+       "failed"
+      ],
+      "title": "Status"
+     },
+     "sources": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Sources"
+     },
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "prompt_version": {
+      "type": "string",
+      "title": "Prompt Version"
+     },
+     "rejected_findings": {
+      "type": "integer",
+      "title": "Rejected Findings",
+      "default": 0
+     },
+     "is_simulation": {
+      "type": "boolean",
+      "title": "Is Simulation",
+      "default": false
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "headline",
+     "findings",
+     "missing_information",
+     "confidence",
+     "limitations",
+     "agent",
+     "status",
+     "sources",
+     "provider",
+     "model",
+     "prompt_version"
+    ],
+    "title": "AgentReport",
+    "description": "Validated, stored report (model output + metadata added by the application)."
+   },
    "AvailabilityItem": {
     "properties": {
      "player_id": {
@@ -1127,6 +1534,40 @@
      "competition_code"
     ],
     "title": "CompetitionSeasonRef"
+   },
+   "Finding": {
+    "properties": {
+     "claim": {
+      "type": "string",
+      "maxLength": 600,
+      "minLength": 1,
+      "title": "Claim"
+     },
+     "evidence_keys": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Evidence Keys"
+     },
+     "strength": {
+      "type": "string",
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "title": "Strength"
+     }
+    },
+    "type": "object",
+    "required": [
+     "claim",
+     "evidence_keys",
+     "strength"
+    ],
+    "title": "Finding"
    },
    "FormMatch": {
     "properties": {
@@ -1459,6 +1900,89 @@
      "error"
     ],
     "title": "IngestionRunOut"
+   },
+   "KeyPlayer": {
+    "properties": {
+     "player_id": {
+      "type": "integer",
+      "title": "Player Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "position": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Position"
+     },
+     "minutes": {
+      "type": "integer",
+      "title": "Minutes"
+     },
+     "goals": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Goals"
+     },
+     "assists": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Assists"
+     },
+     "xg": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Xg"
+     },
+     "xa": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Xa"
+     }
+    },
+    "type": "object",
+    "required": [
+     "player_id",
+     "name",
+     "position",
+     "minutes",
+     "goals",
+     "assists",
+     "xg",
+     "xa"
+    ],
+    "title": "KeyPlayer"
    },
    "LastLineup": {
     "properties": {
@@ -2074,6 +2598,98 @@
     ],
     "title": "MetricSummary"
    },
+   "Outcome": {
+    "properties": {
+     "expected_goals_home": {
+      "type": "number",
+      "title": "Expected Goals Home"
+     },
+     "expected_goals_away": {
+      "type": "number",
+      "title": "Expected Goals Away"
+     },
+     "home_win_share": {
+      "type": "number",
+      "title": "Home Win Share"
+     },
+     "draw_share": {
+      "type": "number",
+      "title": "Draw Share"
+     },
+     "away_win_share": {
+      "type": "number",
+      "title": "Away Win Share"
+     },
+     "mean_goals_home": {
+      "type": "number",
+      "title": "Mean Goals Home"
+     },
+     "mean_goals_away": {
+      "type": "number",
+      "title": "Mean Goals Away"
+     },
+     "home_clean_sheet_share": {
+      "type": "number",
+      "title": "Home Clean Sheet Share"
+     },
+     "away_clean_sheet_share": {
+      "type": "number",
+      "title": "Away Clean Sheet Share"
+     },
+     "both_score_share": {
+      "type": "number",
+      "title": "Both Score Share"
+     },
+     "top_scorelines": {
+      "items": {
+       "prefixItems": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array",
+       "maxItems": 2,
+       "minItems": 2
+      },
+      "type": "array",
+      "title": "Top Scorelines"
+     },
+     "goals_distribution_home": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Goals Distribution Home"
+     },
+     "goals_distribution_away": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Goals Distribution Away"
+     }
+    },
+    "type": "object",
+    "required": [
+     "expected_goals_home",
+     "expected_goals_away",
+     "home_win_share",
+     "draw_share",
+     "away_win_share",
+     "mean_goals_home",
+     "mean_goals_away",
+     "home_clean_sheet_share",
+     "away_clean_sheet_share",
+     "both_score_share",
+     "top_scorelines",
+     "goals_distribution_home",
+     "goals_distribution_away"
+    ],
+    "title": "Outcome"
+   },
    "OverviewOut": {
     "properties": {
      "totals": {
@@ -2454,6 +3070,70 @@
     ],
     "title": "PlayerMatchLog"
    },
+   "PlayerOption": {
+    "properties": {
+     "player_id": {
+      "type": "integer",
+      "title": "Player Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "position": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Position"
+     },
+     "minutes": {
+      "type": "integer",
+      "title": "Minutes"
+     },
+     "minutes_share": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Minutes Share"
+     },
+     "xg_share": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Xg Share"
+     },
+     "reported_unavailable": {
+      "type": "boolean",
+      "title": "Reported Unavailable"
+     }
+    },
+    "type": "object",
+    "required": [
+     "player_id",
+     "name",
+     "position",
+     "minutes",
+     "minutes_share",
+     "xg_share",
+     "reported_unavailable"
+    ],
+    "title": "PlayerOption"
+   },
    "PlayerOut": {
     "properties": {
      "id": {
@@ -2776,6 +3456,385 @@
      "xga_rolling"
     ],
     "title": "SeriesPoint"
+   },
+   "SimulationOptions": {
+    "properties": {
+     "season_id": {
+      "type": "integer",
+      "title": "Season Id"
+     },
+     "home_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "away_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "home_usual_formation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Home Usual Formation"
+     },
+     "away_usual_formation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Away Usual Formation"
+     },
+     "formations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Formations"
+     },
+     "home_players": {
+      "items": {
+       "$ref": "#/components/schemas/PlayerOption"
+      },
+      "type": "array",
+      "title": "Home Players"
+     },
+     "away_players": {
+      "items": {
+       "$ref": "#/components/schemas/PlayerOption"
+      },
+      "type": "array",
+      "title": "Away Players"
+     },
+     "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "title": "As Of"
+     }
+    },
+    "type": "object",
+    "required": [
+     "season_id",
+     "home_team",
+     "away_team",
+     "home_usual_formation",
+     "away_usual_formation",
+     "formations",
+     "home_players",
+     "away_players",
+     "as_of"
+    ],
+    "title": "SimulationOptions"
+   },
+   "SimulationOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "is_simulation": {
+      "type": "boolean",
+      "const": true,
+      "title": "Is Simulation",
+      "default": true
+     },
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "default": "SIMULAZIONE — scenario ipotetico, non un risultato reale né garantito"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "match_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Match Id"
+     },
+     "season_id": {
+      "type": "integer",
+      "title": "Season Id"
+     },
+     "home_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "away_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "venue": {
+      "type": "string",
+      "title": "Venue"
+     },
+     "model_version": {
+      "type": "string",
+      "title": "Model Version"
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed"
+     },
+     "n_iterations": {
+      "type": "integer",
+      "title": "N Iterations"
+     },
+     "training_window": {
+      "$ref": "#/components/schemas/TrainingWindow"
+     },
+     "strengths": {
+      "additionalProperties": {
+       "additionalProperties": {
+        "type": "number"
+       },
+       "type": "object"
+      },
+      "type": "object",
+      "title": "Strengths"
+     },
+     "baseline": {
+      "$ref": "#/components/schemas/Outcome"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Outcome"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scenario_description": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Scenario Description"
+     },
+     "assumptions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Assumptions"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Limitations"
+     },
+     "is_synthetic_data": {
+      "type": "boolean",
+      "title": "Is Synthetic Data"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "created_at",
+     "match_id",
+     "season_id",
+     "home_team",
+     "away_team",
+     "venue",
+     "model_version",
+     "seed",
+     "n_iterations",
+     "training_window",
+     "strengths",
+     "baseline",
+     "scenario",
+     "scenario_description",
+     "assumptions",
+     "limitations",
+     "is_synthetic_data"
+    ],
+    "title": "SimulationOut"
+   },
+   "SimulationRequest": {
+    "properties": {
+     "season_id": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Season Id"
+     },
+     "home_team_id": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Home Team Id"
+     },
+     "away_team_id": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Away Team Id"
+     },
+     "match_id": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Match Id"
+     },
+     "venue": {
+      "type": "string",
+      "enum": [
+       "home",
+       "neutral",
+       "swapped"
+      ],
+      "title": "Venue",
+      "default": "home"
+     },
+     "unavailable_player_ids": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "maxItems": 30,
+      "title": "Unavailable Player Ids"
+     },
+     "home_formation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Home Formation"
+     },
+     "away_formation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Away Formation"
+     },
+     "seed": {
+      "type": "integer",
+      "maximum": 2147483647.0,
+      "minimum": 0.0,
+      "title": "Seed",
+      "default": 2026
+     },
+     "n_iterations": {
+      "type": "integer",
+      "maximum": 200000.0,
+      "minimum": 1000.0,
+      "title": "N Iterations",
+      "default": 20000
+     }
+    },
+    "type": "object",
+    "title": "SimulationRequest"
+   },
+   "SimulationSummary": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "home_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "away_team": {
+      "$ref": "#/components/schemas/TeamRef"
+     },
+     "venue": {
+      "type": "string",
+      "title": "Venue"
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed"
+     },
+     "n_iterations": {
+      "type": "integer",
+      "title": "N Iterations"
+     },
+     "has_scenario": {
+      "type": "boolean",
+      "title": "Has Scenario"
+     },
+     "home_win_share": {
+      "type": "number",
+      "title": "Home Win Share"
+     },
+     "draw_share": {
+      "type": "number",
+      "title": "Draw Share"
+     },
+     "away_win_share": {
+      "type": "number",
+      "title": "Away Win Share"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "created_at",
+     "home_team",
+     "away_team",
+     "venue",
+     "seed",
+     "n_iterations",
+     "has_scenario",
+     "home_win_share",
+     "draw_share",
+     "away_win_share"
+    ],
+    "title": "SimulationSummary"
    },
    "SourceOut": {
     "properties": {
@@ -3204,6 +4263,24 @@
       },
       "type": "object",
       "title": "Formation Usage"
+     },
+     "key_players": {
+      "items": {
+       "$ref": "#/components/schemas/KeyPlayer"
+      },
+      "type": "array",
+      "title": "Key Players",
+      "default": []
+     },
+     "confirmed_lineup": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/LastLineup"
+       },
+       {
+        "type": "null"
+       }
+      ]
      }
     },
     "type": "object",
@@ -3548,6 +4625,66 @@
      "offsides"
     ],
     "title": "TeamStatsOut"
+   },
+   "TrainingWindow": {
+    "properties": {
+     "matches_used": {
+      "type": "integer",
+      "title": "Matches Used"
+     },
+     "start": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Start"
+     },
+     "end": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "End"
+     },
+     "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "title": "As Of"
+     },
+     "uses_xg": {
+      "type": "boolean",
+      "title": "Uses Xg"
+     },
+     "home_matches": {
+      "type": "integer",
+      "title": "Home Matches"
+     },
+     "away_matches": {
+      "type": "integer",
+      "title": "Away Matches"
+     }
+    },
+    "type": "object",
+    "required": [
+     "matches_used",
+     "start",
+     "end",
+     "as_of",
+     "uses_xg",
+     "home_matches",
+     "away_matches"
+    ],
+    "title": "TrainingWindow"
    },
    "ValidationError": {
     "properties": {

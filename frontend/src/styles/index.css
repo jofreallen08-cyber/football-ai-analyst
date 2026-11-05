@@ -27,6 +27,7 @@
   /* Categorical chart series (validated for CVD on the navy surface) */
   --color-series-1: #3987e5;
   --color-series-2: #d95926;
+  --color-series-3: #199e70;
 }
 
 @layer base {

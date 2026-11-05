@@ -48,10 +48,14 @@ class StatisticsAgent(BaseAgent):
     name = "statistics"
     title = "Statistics AI"
 
-    def build_evidence(self, ctx: MatchContext) -> dict[str, Any]:
+    def build_evidence(
+        self, ctx: MatchContext, extra: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         return {**self.meta(ctx), **_team("home", ctx.home), **_team("away", ctx.away)}
 
-    def skip_reason(self, ctx: MatchContext, evidence: dict[str, Any]) -> str | None:
+    def skip_reason(
+        self, ctx: MatchContext, evidence: dict[str, Any], extra: dict[str, Any] | None = None
+    ) -> str | None:
         has_metrics = any(k.endswith(".per_match") for k in evidence)
         if not has_metrics:
             return (

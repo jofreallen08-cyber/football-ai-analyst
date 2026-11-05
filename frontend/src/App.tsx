@@ -8,9 +8,10 @@ import { NotFound } from './pages/NotFound'
 import { Overview } from './pages/Overview'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { PlayerAnalytics } from './pages/PlayerAnalytics'
+import { SimulationLab } from './pages/SimulationLab'
 import { TeamAnalytics } from './pages/TeamAnalytics'
 
-const IMPLEMENTED = new Set(['/', '/partite', '/squadre', '/giocatori'])
+const IMPLEMENTED = new Set(['/', '/partite', '/squadre', '/giocatori', '/simulazioni'])
 
 /** Application routes. The router and query client are provided by the caller. */
 export function App() {
@@ -22,11 +23,12 @@ export function App() {
         <Route path="partite/:id" element={<MatchDetail />} />
         <Route path="squadre" element={<TeamAnalytics />} />
         <Route path="giocatori" element={<PlayerAnalytics />} />
+        <Route path="simulazioni" element={<SimulationLab />} />
         {NAV_ITEMS.filter((i) => !IMPLEMENTED.has(i.path)).map((item) => (
           <Route
             key={item.path}
             path={item.path.slice(1)}
-            element={<PlaceholderPage item={item} simulation={item.path === '/simulazioni'} />}
+            element={<PlaceholderPage item={item} />}
           />
         ))}
         <Route path="*" element={<NotFound />} />

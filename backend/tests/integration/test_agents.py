@@ -150,4 +150,4 @@ async def test_single_agent_endpoint(api_client) -> None:
     body = r.json()
     assert body["agent"] == "statistics" and body["provider"] == "mock"
     assert body["status"] in ("completed", "cached")
-    assert (await api_client.post(f"/api/v1/matches/{mid}/agents/simulation")).status_code == 422
+    assert (await api_client.post(f"/api/v1/matches/{mid}/agents/master")).status_code == 422
