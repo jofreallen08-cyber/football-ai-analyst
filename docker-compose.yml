@@ -1,0 +1,44 @@
+# Esecuzione locale completa: http://127.0.0.1:8080
+# Uso: cp .env.example .env && docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: football
+      POSTGRES_PASSWORD: football
+      POSTGRES_DB: football_ai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U football -d football_ai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://football:football@db:5432/football_ai
+      CORS_ORIGINS: http://127.0.0.1:8080,http://localhost:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:80"   # esposto solo su localhost (utente singolo)
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
