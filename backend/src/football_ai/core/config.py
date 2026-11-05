@@ -37,7 +37,10 @@ class Settings(BaseSettings):
 
     # AI provider (used from Phase 4). "mock" never performs network calls.
     ai_provider: Literal["anthropic", "mock"] = "mock"
-    ai_model: str = "claude-sonnet-5-5"
+    ai_model: str = "claude-opus-5-5"
+    ai_effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
+    ai_max_output_tokens: int = Field(default=4000, ge=256, le=32000)
+    ai_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     anthropic_api_key: SecretStr | None = None
     ai_daily_call_limit: int = Field(default=100, ge=0)
     ai_daily_token_limit: int = Field(default=500_000, ge=0)

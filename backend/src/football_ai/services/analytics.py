@@ -30,6 +30,7 @@ from football_ai.repositories import analytics as arepo
 from football_ai.repositories import football as frepo
 from football_ai.schemas.analytics import (
     AvailabilityItem,
+    KeyPlayer,
     LastLineup,
     MatchContext,
     OverviewOut,
@@ -291,6 +292,36 @@ def match_context(session: Session, match_id: int) -> MatchContext:
         team_xg = sum(x for x in team_xg_vals if x is not None) or None
         last, usage = _lineups(session, team_id, m.season_id, as_of)
         row = table.get(team_id)
+        ranked = sorted(
+            team_aggs.values(),
+            key=lambda a: (
+                -(a.totals.get("xg") or 0.0),
+                -(a.totals.get("goals") or 0.0),
+                a.player_id,
+            ),
+        )[:3]
+        names = {
+            p.id: p
+            for p in session.scalars(
+                select(Player).where(Player.id.in_([a.player_id for a in ranked]))
+            )
+        }
+        key_players = [
+            KeyPlayer(
+                player_id=a.player_id,
+                name=names[a.player_id].full_name,
+                position=names[a.player_id].primary_position,
+                minutes=a.minutes,
+                goals=a.totals.get("goals"),
+                assists=a.totals.get("assists"),
+                xg=a.totals.get("xg"),
+                xa=a.totals.get("xa"),
+            )
+            for a in ranked
+        ]
+        confirmed = next(
+            (lu for lu in match.lineups if lu.team_id == team_id and lu.confirmed), None
+        )
         return TeamContext(
             team=match.home_team if team_id == m.home_team_id else match.away_team,
             position=row.position if row and row.played else None,
@@ -302,6 +333,16 @@ def match_context(session: Session, match_id: int) -> MatchContext:
             availability=_availability(session, team_id, as_of, team_aggs, team_minutes, team_xg),
             last_lineup=last,
             formation_usage=usage,
+            key_players=key_players,
+            confirmed_lineup=LastLineup(
+                match_id=match.id,
+                kickoff_at=match.kickoff_at,
+                formation=confirmed.formation,
+                confirmed=True,
+                starters=[e.player_name for e in confirmed.entries if e.role == "starter"],
+            )
+            if confirmed
+            else None,
         )
 
     home = team_ctx(m.home_team_id, "home")

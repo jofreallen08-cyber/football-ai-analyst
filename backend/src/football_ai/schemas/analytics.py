@@ -104,6 +104,17 @@ class LastLineup(BaseModel):
     starters: list[str]
 
 
+class KeyPlayer(BaseModel):
+    player_id: int
+    name: str
+    position: str | None
+    minutes: int
+    goals: float | None
+    assists: float | None
+    xg: float | None
+    xa: float | None
+
+
 class TeamContext(BaseModel):
     team: TeamRef
     position: int | None
@@ -115,6 +126,8 @@ class TeamContext(BaseModel):
     availability: list[AvailabilityItem]
     last_lineup: LastLineup | None
     formation_usage: dict[str, int]
+    key_players: list[KeyPlayer] = []
+    confirmed_lineup: LastLineup | None = None
 
 
 class MatchContext(BaseModel):

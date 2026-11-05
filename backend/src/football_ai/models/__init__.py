@@ -1,5 +1,14 @@
 """ORM models. Importing this package registers every table on ``Base.metadata``."""
 
+from football_ai.models.ai import (
+    AgentReportRow,
+    AgentStatus,
+    AICache,
+    AIUsage,
+    AnalysisRun,
+    FinalReport,
+    RunStatus,
+)
 from football_ai.models.base import Base
 from football_ai.models.football import (
     AvailabilityStatus,
@@ -31,6 +40,11 @@ from football_ai.models.provenance import (
 )
 
 __all__ = [
+    "AICache",
+    "AIUsage",
+    "AgentReportRow",
+    "AgentStatus",
+    "AnalysisRun",
     "AvailabilityStatus",
     "AvailabilityType",
     "Base",
@@ -38,6 +52,7 @@ __all__ = [
     "CompetitionType",
     "DataSource",
     "ExternalRef",
+    "FinalReport",
     "IngestionIssue",
     "IngestionRun",
     "IngestionStatus",
@@ -52,6 +67,7 @@ __all__ = [
     "PlayerAvailability",
     "PlayerMatchStats",
     "ProviderCache",
+    "RunStatus",
     "Season",
     "SquadMembership",
     "Team",
