@@ -4,8 +4,8 @@ Each phase ends with passing tests, updated docs and a demo-able result. Approva
 
 | Phase | Name | Scope | Exit criteria |
 |---|---|---|---|
-| **0** | Planning *(this deliverable)* | Architecture, structure, schema, agent specs, roadmap | Approved by product owner |
-| **1** | Foundation | Monorepo skeleton, FastAPI app + health endpoint, config/logging, SQLAlchemy + Alembic, core domain tables, Docker Compose, CI, frontend shell (Vite/Tailwind, dark layout, sidebar with 8 routes, placeholder pages, loading/error components) | `pytest` + `pnpm test` green; app boots locally; CI passes |
+| **0** ✅ | Planning | Architecture, structure, schema, agent specs, roadmap | Approved by product owner |
+| **1** ✅ | Foundation | Monorepo skeleton, FastAPI app + health endpoint, config/logging, SQLAlchemy + Alembic, core domain tables, Docker Compose, CI, frontend shell (Vite/Tailwind, dark layout, sidebar with 8 routes, placeholder pages, loading/error components) | `pytest` + `pnpm test` green; app boots locally; CI passes |
 | **2** | Data layer v1 | `DataProvider` protocol, registry, cache, rate limiter, validator, normaliser; `LocalSampleProvider` with bundled sample dataset (2–3 leagues, 1–2 seasons); ingestion CLI + `ingestion_runs`; read APIs: competitions, seasons, matches, teams, players | Sample data ingested reproducibly; invalid rows logged in `ingestion_issues`; API tested |
 | **3** | Analytics & dashboard data pages | Feature builders (form, splits, xG/stat trends, player per-90); Overview, Match Center, Team Analytics, Player Analytics pages with Recharts, pitch/formation component, source attribution | Pages render real sample data; features unit-tested incl. missing-data cases |
 | **4** | AI layer & agents 1–3 | LLMProvider (Anthropic + Mock), prompt registry, AI cache, budget, `ai_usage`; agents 1–3 with validation & grounding checks | Agents run offline with mock; one live smoke test with real key; cache hit verified (0 calls on rerun) |

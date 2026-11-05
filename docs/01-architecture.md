@@ -123,9 +123,9 @@ A failing agent does not fail the run: the master report is produced with that a
 
 ## 8. Frontend architecture
 
-* Vite + React 18 + TypeScript (strict) + Tailwind CSS; React Router; TanStack Query for server state; Recharts for charts; custom SVG pitch component for formations/shot maps.
+* Vite + React 19 + TypeScript (strict) + Tailwind CSS v4 (tokens declared with `@theme` in `src/styles/index.css`); React Router; TanStack Query for server state; Recharts for charts; custom SVG pitch component for formations/shot maps.
 * Typed API client generated from FastAPI's OpenAPI schema (`openapi-typescript`) — no hand-written drift.
-* Design tokens (dark navy palette, spacing, typography) in Tailwind config; shared components: `Card`, `StatTile`, `AgentStatusBadge`, `SourceAttribution`, `SimulationBanner`, `EmptyState`, `ErrorState`, `Skeleton`.
+* Italian UI; design tokens (dark navy palette, spacing, typography) in the Tailwind `@theme` block; shared components: `Card`, `StatTile`, `AgentStatusBadge`, `SourceAttribution`, `SimulationBanner`, `EmptyState`, `ErrorState`, `Skeleton`.
 * No secrets in the bundle: the frontend only knows the backend base URL.
 
 ## 9. Cross-cutting concerns

@@ -1,5 +1,7 @@
 # 06 — Initial Implementation Plan (Phase 1: Foundation)
 
+> **Stato: completata** (ramo `feat/phase-1-foundation`). Decisioni del product owner in [ADR 0001](adr/0001-decisioni-iniziali.md). Differenze rispetto al piano: React 19 / Vite 8 / TypeScript 7 / oxlint (versioni correnti dello scaffold), Tailwind v4 con token nel CSS, percorsi delle pagine in italiano.
+
 Goal: a running, tested skeleton — no football logic yet, no AI calls. Delivered as small commits on a feature branch.
 
 ## Steps

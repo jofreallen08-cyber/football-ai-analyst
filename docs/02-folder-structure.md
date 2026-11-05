@@ -95,7 +95,7 @@ football-ai-analyst/
     ├── package.json                 # pnpm
     ├── Dockerfile
     ├── vite.config.ts
-    ├── tailwind.config.ts           # dark navy design tokens
+    ├── nginx.conf                   # production container: static files + /api proxy
     ├── tsconfig.json
     ├── index.html
     ├── src/
@@ -118,6 +118,6 @@ football-ai-analyst/
     │   │   ├── Reports.tsx
     │   │   └── Settings.tsx
     │   ├── lib/                     # formatters, constants
-    │   └── styles/index.css
+    │   └── styles/index.css         # Tailwind v4 + dark navy design tokens (@theme)
     └── tests/                       # Vitest unit + Playwright smoke
 ```
