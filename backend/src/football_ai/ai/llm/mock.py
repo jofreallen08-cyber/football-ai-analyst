@@ -44,12 +44,13 @@ def _master_report(payload: dict[str, Any]) -> dict[str, Any]:
     key_findings = []
     for agent, rep in reports.items():
         if rep and rep.get("findings"):
-            f = rep["findings"][0]
-            key_findings.append({"agent": agent, "finding": f["claim"]})
+            first = rep["findings"][0]
+            claim = first["claim"] if isinstance(first, dict) else str(first)
+            key_findings.append({"agent": agent, "finding": claim})
     missing = sorted(
         {m for rep in reports.values() if rep for m in rep.get("missing_information", [])}
     )
-    available = sum(1 for r in reports.values() if r)
+    available = sum(1 for r in reports.values() if r and r.get("findings"))
     return {
         "summary": f"Sintesi offline di {available} report disponibili.",
         "key_findings": key_findings,

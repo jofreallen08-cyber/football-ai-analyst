@@ -35,6 +35,12 @@ export type SimulationSummary = S['SimulationSummary']
 export type SimulationOptions = S['SimulationOptions']
 export type PlayerOption = S['PlayerOption']
 export type AgentReport = S['AgentReport']
+export type AgentInfo = S['AgentInfo']
+export type AgentSlot = S['AgentSlot']
+export type Analysis = S['AnalysisOut']
+export type AnalysisSummary = S['AnalysisSummary']
+export type FinalReport = S['FinalReportOut']
+export type AIUsage = S['AIUsageOut']
 
 export interface Page<T> {
   items: T[]

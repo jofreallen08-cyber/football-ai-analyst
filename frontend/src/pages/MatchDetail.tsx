@@ -1,4 +1,4 @@
-import { ArrowLeft, FlaskConical, Info } from 'lucide-react'
+import { ArrowLeft, Bot, FlaskConical, Info } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 
 import { useMatch, useMatchContext } from '../api/queries'
@@ -93,9 +93,14 @@ export function MatchDetail() {
           <ArrowLeft className="size-4" /> Centro Partite
         </Link>
         {matchId && (
+          <span className="flex flex-wrap gap-2">
+          <Link to={`/agenti?partita=${matchId}`} className="inline-flex items-center gap-1.5 rounded-md border border-accent/50 px-3 py-1.5 text-sm text-accent hover:bg-accent/10">
+            <Bot className="size-4" /> Analisi AI
+          </Link>
           <Link to={`/simulazioni?partita=${matchId}`} className="inline-flex items-center gap-1.5 rounded-md border border-sim/50 px-3 py-1.5 text-sm text-sim hover:bg-sim/10">
             <FlaskConical className="size-4" /> Simula questa partita
           </Link>
+          </span>
         )}
       </div>
       <QueryState query={match} rows={6}>

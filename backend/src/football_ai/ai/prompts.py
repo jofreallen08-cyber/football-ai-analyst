@@ -11,7 +11,9 @@ COMMON = "common"
 
 @cache
 def load_prompt(agent: str, version: str) -> str:
-    """Common rules + agent-specific instructions."""
-    common = (PROMPT_DIR / COMMON / f"{version}.md").read_text(encoding="utf-8")
+    """Common rules + agent-specific instructions (the master prompt is self-contained)."""
     specific = (PROMPT_DIR / agent / f"{version}.md").read_text(encoding="utf-8")
+    if agent == "master":
+        return specific.strip() + "\n"
+    common = (PROMPT_DIR / COMMON / f"{version}.md").read_text(encoding="utf-8")
     return f"{common.strip()}\n\n{specific.strip()}\n"

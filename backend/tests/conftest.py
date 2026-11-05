@@ -105,6 +105,11 @@ async def api_client(settings: Settings, seeded_engine: Engine) -> AsyncIterator
         with Session(seeded_engine) as s:
             yield s
 
+    from sqlalchemy.orm import sessionmaker
+
+    from football_ai.core.db import get_session_factory
+
     app.dependency_overrides[get_session] = _session
+    app.dependency_overrides[get_session_factory] = lambda: sessionmaker(bind=seeded_engine)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac

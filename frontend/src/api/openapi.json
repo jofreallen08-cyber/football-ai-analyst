@@ -1231,10 +1231,350 @@
      }
     }
    }
+  },
+  "/api/v1/agents": {
+   "get": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Catalogo degli agenti",
+    "operationId": "agents_api_v1_agents_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/AgentInfo"
+         },
+         "type": "array",
+         "title": "Response Agents Api V1 Agents Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/analyses": {
+   "post": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Avvia l'analisi multi-agente di una partita (riusa analisi identiche)",
+    "operationId": "start_analysis_api_v1_analyses_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AnalysisRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AnalysisOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Storico analisi e report",
+    "operationId": "list_analyses_api_v1_analyses_get",
+    "parameters": [
+     {
+      "name": "match_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4611686018427387904,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Match Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 1,
+       "description": "Numero massimo di elementi",
+       "default": 20,
+       "title": "Limit"
+      },
+      "description": "Numero massimo di elementi"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/AnalysisSummary"
+         },
+         "title": "Response List Analyses Api V1 Analyses Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/analyses/{run_id}": {
+   "get": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Stato e risultati di un'analisi",
+    "operationId": "get_analysis_api_v1_analyses__run_id__get",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Run Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AnalysisOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/analyses/{run_id}/report.md": {
+   "get": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Esporta il report finale in Markdown",
+    "operationId": "export_api_v1_analyses__run_id__report_md_get",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Run Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "text/plain": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/ai/usage": {
+   "get": {
+    "tags": [
+     "analisi AI"
+    ],
+    "summary": "Utilizzo AI di oggi e limiti",
+    "operationId": "usage_api_v1_ai_usage_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AIUsageOut"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
   "schemas": {
+   "AIUsageOut": {
+    "properties": {
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "effort": {
+      "type": "string",
+      "title": "Effort"
+     },
+     "billable": {
+      "type": "boolean",
+      "title": "Billable"
+     },
+     "today_calls": {
+      "type": "integer",
+      "title": "Today Calls"
+     },
+     "today_tokens": {
+      "type": "integer",
+      "title": "Today Tokens"
+     },
+     "by_agent": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "By Agent"
+     },
+     "limits": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Limits"
+     },
+     "cache_entries": {
+      "type": "integer",
+      "title": "Cache Entries"
+     },
+     "cache_hits": {
+      "type": "integer",
+      "title": "Cache Hits"
+     }
+    },
+    "type": "object",
+    "required": [
+     "provider",
+     "model",
+     "effort",
+     "billable",
+     "today_calls",
+     "today_tokens",
+     "by_agent",
+     "limits",
+     "cache_entries",
+     "cache_hits"
+    ],
+    "title": "AIUsageOut"
+   },
+   "AgentInfo": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description"
+     },
+     "data_needs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Data Needs"
+     },
+     "is_simulation": {
+      "type": "boolean",
+      "title": "Is Simulation"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "title",
+     "description",
+     "data_needs",
+     "is_simulation"
+    ],
+    "title": "AgentInfo"
+   },
    "AgentReport": {
     "properties": {
      "headline": {
@@ -1344,6 +1684,245 @@
     ],
     "title": "AgentReport",
     "description": "Validated, stored report (model output + metadata added by the application)."
+   },
+   "AgentSlot": {
+    "properties": {
+     "agent": {
+      "type": "string",
+      "title": "Agent"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "pending",
+       "running",
+       "completed",
+       "cached",
+       "skipped",
+       "failed"
+      ],
+      "title": "Status"
+     },
+     "report": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/AgentReport"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "agent",
+     "title",
+     "status",
+     "report"
+    ],
+    "title": "AgentSlot"
+   },
+   "AnalysisOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "match": {
+      "$ref": "#/components/schemas/MatchOut"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "reused": {
+      "type": "boolean",
+      "title": "Reused",
+      "default": false
+     },
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "requested_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Requested At"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "finished_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Finished At"
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     },
+     "agents": {
+      "items": {
+       "$ref": "#/components/schemas/AgentSlot"
+      },
+      "type": "array",
+      "title": "Agents"
+     },
+     "final_report": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/FinalReportOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "match",
+     "status",
+     "provider",
+     "model",
+     "requested_at",
+     "started_at",
+     "finished_at",
+     "error",
+     "agents",
+     "final_report"
+    ],
+    "title": "AnalysisOut"
+   },
+   "AnalysisRequest": {
+    "properties": {
+     "match_id": {
+      "type": "integer",
+      "title": "Match Id"
+     },
+     "force": {
+      "type": "boolean",
+      "title": "Force",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "match_id"
+    ],
+    "title": "AnalysisRequest"
+   },
+   "AnalysisSummary": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Id"
+     },
+     "match": {
+      "$ref": "#/components/schemas/MatchOut"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "requested_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Requested At"
+     },
+     "finished_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Finished At"
+     },
+     "confidence": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Summary"
+     },
+     "generated_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Generated By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "match",
+     "status",
+     "requested_at",
+     "finished_at",
+     "confidence",
+     "summary",
+     "generated_by"
+    ],
+    "title": "AnalysisSummary"
    },
    "AvailabilityItem": {
     "properties": {
@@ -1534,6 +2113,167 @@
      "competition_code"
     ],
     "title": "CompetitionSeasonRef"
+   },
+   "DetectedContradiction": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "title": "Code"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description"
+     },
+     "agents": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Agents"
+     },
+     "severity": {
+      "type": "string",
+      "title": "Severity"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code",
+     "description",
+     "agents",
+     "severity"
+    ],
+    "title": "DetectedContradiction"
+   },
+   "FinalReportOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "analysis_run_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Analysis Run Id"
+     },
+     "match": {
+      "$ref": "#/components/schemas/MatchOut"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "generated_by": {
+      "type": "string",
+      "enum": [
+       "ai",
+       "automatic"
+      ],
+      "title": "Generated By"
+     },
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "key_findings": {
+      "items": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Key Findings"
+     },
+     "agreements": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Agreements"
+     },
+     "contradictions": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Contradictions"
+     },
+     "detected_contradictions": {
+      "items": {
+       "$ref": "#/components/schemas/DetectedContradiction"
+      },
+      "type": "array",
+      "title": "Detected Contradictions"
+     },
+     "missing_information": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Missing Information"
+     },
+     "confidence": {
+      "type": "string",
+      "title": "Confidence"
+     },
+     "agent_statuses": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Agent Statuses"
+     },
+     "sources": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Sources"
+     },
+     "data_as_of": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Data As Of"
+     },
+     "disclaimer": {
+      "type": "string",
+      "title": "Disclaimer"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "analysis_run_id",
+     "match",
+     "created_at",
+     "generated_by",
+     "provider",
+     "model",
+     "summary",
+     "key_findings",
+     "agreements",
+     "contradictions",
+     "detected_contradictions",
+     "missing_information",
+     "confidence",
+     "agent_statuses",
+     "sources",
+     "data_as_of",
+     "disclaimer"
+    ],
+    "title": "FinalReportOut"
    },
    "Finding": {
     "properties": {

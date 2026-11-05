@@ -34,6 +34,31 @@ const teamCtx = (t: typeof H) => ({
   stats: { matches: 1, metrics: [], missing: [] }, availability: [], last_lineup: null, formation_usage: {},
 })
 
+const agentReport = {
+  agent: 'match_analyst', status: 'completed', headline: 'Casa in forma', confidence: 'medium',
+  findings: [{ claim: 'Aquile ha 3 punti nelle ultime partite', evidence_keys: ['home.form5.points'], strength: 'medium' }],
+  missing_information: ['Formazioni non disponibili dalla fonte'], limitations: [], sources: ['openfootball'],
+  provider: 'mock', model: 'mock-offline-v1', prompt_version: 'v1', rejected_findings: 0, is_simulation: false, error: null,
+}
+
+const analysis = {
+  id: 'run-1', match: match(100, 'finished', 2, 0), status: 'completed', reused: false, provider: 'mock', model: 'mock-offline-v1',
+  requested_at: '2026-11-05T10:00:00Z', started_at: '2026-11-05T10:00:01Z', finished_at: '2026-11-05T10:00:05Z', error: null,
+  agents: [
+    { agent: 'match_analyst', title: 'Match Analyst', status: 'completed', report: agentReport },
+    { agent: 'statistics', title: 'Statistics AI', status: 'skipped', report: { ...agentReport, agent: 'statistics', status: 'skipped', headline: 'Analisi non eseguita: dati insufficienti', findings: [] } },
+  ],
+  final_report: {
+    id: 1, analysis_run_id: 'run-1', match: match(100, 'finished', 2, 0), created_at: '2026-11-05T10:00:05Z', generated_by: 'ai',
+    provider: 'mock', model: 'mock-offline-v1', summary: 'Sintesi di prova.',
+    key_findings: [{ agent: 'match_analyst', finding: 'Aquile ha 3 punti nelle ultime partite' }],
+    agreements: [], contradictions: [{ description: 'Classifica e simulazione divergono', agents: ['match_analyst'], assessment: 'Campione ridotto' }],
+    detected_contradictions: [], missing_information: ['Formazioni non disponibili dalla fonte'], confidence: 'medium',
+    agent_statuses: { match_analyst: 'completed', statistics: 'skipped' }, sources: [{ name: 'openfootball', attribution_text: 'Risultati: openfootball' }],
+    data_as_of: '2026-01-10T17:00:00Z', disclaimer: 'Report a scopo educativo. Nessun consiglio di scommessa.',
+  },
+}
+
 export const fixtures: Record<string, unknown> = {
   '/health': health,
   '/competitions': competitions,
@@ -87,6 +112,14 @@ export const fixtures: Record<string, unknown> = {
     scenario: null, scenario_description: {}, assumptions: ['Modello poisson-v1: forze calcolate su 50 partite.'],
     limitations: ['Le percentuali sono frequenze sulle simulazioni eseguite.'], is_synthetic_data: true,
   },
+  '/agents': [
+    { name: 'match_analyst', title: 'Match Analyst', description: 'Forma e contesto.', data_needs: ['risultati'], is_simulation: false },
+    { name: 'master', title: 'Master Analyst', description: 'Sintesi finale.', data_needs: ['report'], is_simulation: false },
+  ],
+  '/ai/usage': { provider: 'mock', model: 'mock-offline-v1', effort: 'medium', billable: false, today_calls: 3, today_tokens: 0, by_agent: {}, limits: { daily_calls: 100, daily_tokens: 500000, calls_per_analysis: 5 }, cache_entries: 4, cache_hits: 2 },
+  'POST /analyses': analysis,
+  '/analyses/run-1': analysis,
+  '/analyses': [{ id: 'run-1', match: match(100, 'finished', 2, 0), status: 'completed', requested_at: '2026-11-05T10:00:00Z', finished_at: '2026-11-05T10:00:05Z', confidence: 'medium', summary: 'Sintesi di prova.', generated_by: 'ai' }],
   '/seasons/10/player-leaders': { season: {}, metric: 'goals', per90: false, min_minutes_per90: 270, items: [] },
 }
 

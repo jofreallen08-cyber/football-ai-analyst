@@ -11,7 +11,7 @@ export function AppLayout() {
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-      <aside className="hidden border-r border-line bg-navy-900 lg:flex lg:flex-col">
+      <aside className="hidden border-r border-line bg-navy-900 lg:flex lg:flex-col print:hidden">
         <div className="border-b border-line px-5 py-4">
           <Logo />
         </div>
@@ -39,7 +39,7 @@ export function AppLayout() {
       )}
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-navy-950/90 px-4 py-3 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 print:hidden flex items-center justify-between gap-3 border-b border-line bg-navy-950/90 px-4 py-3 backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"

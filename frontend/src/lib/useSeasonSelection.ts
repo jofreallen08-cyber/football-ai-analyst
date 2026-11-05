@@ -6,7 +6,7 @@ import type { Competition, Season } from '../api/types'
 const DEFAULT_COMPETITION = 'SA'
 
 /** Season selection persisted in the URL (`?stagione=<id>`), defaulting to Serie A. */
-export function useSeasonSelection() {
+export function useSeasonSelection(fallbackSeasonId?: number) {
   const competitions = useCompetitions()
   const [params, setParams] = useSearchParams()
   const raw = params.get('stagione')
@@ -15,6 +15,11 @@ export function useSeasonSelection() {
     const list = competitions.data ?? []
     for (const c of list) {
       const s = c.seasons.find((x) => String(x.id) === raw)
+      if (s) return { competition: c, season: s }
+    }
+    const target = raw ?? (fallbackSeasonId !== undefined ? String(fallbackSeasonId) : null)
+    for (const c of list) {
+      const s = c.seasons.find((x) => String(x.id) === target)
       if (s) return { competition: c, season: s }
     }
     const fallback = list.find((c) => c.code === DEFAULT_COMPETITION) ?? list[0]

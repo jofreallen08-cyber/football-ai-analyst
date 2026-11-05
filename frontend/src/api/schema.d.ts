@@ -345,10 +345,136 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalogo degli agenti */
+        get: operations["agents_api_v1_agents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analyses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Storico analisi e report */
+        get: operations["list_analyses_api_v1_analyses_get"];
+        put?: never;
+        /** Avvia l'analisi multi-agente di una partita (riusa analisi identiche) */
+        post: operations["start_analysis_api_v1_analyses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analyses/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stato e risultati di un'analisi */
+        get: operations["get_analysis_api_v1_analyses__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analyses/{run_id}/report.md": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Esporta il report finale in Markdown */
+        get: operations["export_api_v1_analyses__run_id__report_md_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Utilizzo AI di oggi e limiti */
+        get: operations["usage_api_v1_ai_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIUsageOut */
+        AIUsageOut: {
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Effort */
+            effort: string;
+            /** Billable */
+            billable: boolean;
+            /** Today Calls */
+            today_calls: number;
+            /** Today Tokens */
+            today_tokens: number;
+            /** By Agent */
+            by_agent: {
+                [key: string]: number;
+            };
+            /** Limits */
+            limits: {
+                [key: string]: number;
+            };
+            /** Cache Entries */
+            cache_entries: number;
+            /** Cache Hits */
+            cache_hits: number;
+        };
+        /** AgentInfo */
+        AgentInfo: {
+            /** Name */
+            name: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string;
+            /** Data Needs */
+            data_needs: string[];
+            /** Is Simulation */
+            is_simulation: boolean;
+        };
         /**
          * AgentReport
          * @description Validated, stored report (model output + metadata added by the application).
@@ -394,6 +520,87 @@ export interface components {
             is_simulation: boolean;
             /** Error */
             error?: string | null;
+        };
+        /** AgentSlot */
+        AgentSlot: {
+            /** Agent */
+            agent: string;
+            /** Title */
+            title: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "running" | "completed" | "cached" | "skipped" | "failed";
+            report: components["schemas"]["AgentReport"] | null;
+        };
+        /** AnalysisOut */
+        AnalysisOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            match: components["schemas"]["MatchOut"];
+            /** Status */
+            status: string;
+            /**
+             * Reused
+             * @default false
+             */
+            reused: boolean;
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Started At */
+            started_at: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Error */
+            error: string | null;
+            /** Agents */
+            agents: components["schemas"]["AgentSlot"][];
+            final_report: components["schemas"]["FinalReportOut"] | null;
+        };
+        /** AnalysisRequest */
+        AnalysisRequest: {
+            /** Match Id */
+            match_id: number;
+            /**
+             * Force
+             * @default false
+             */
+            force: boolean;
+        };
+        /** AnalysisSummary */
+        AnalysisSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            match: components["schemas"]["MatchOut"];
+            /** Status */
+            status: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Confidence */
+            confidence: string | null;
+            /** Summary */
+            summary: string | null;
+            /** Generated By */
+            generated_by: string | null;
         };
         /** AvailabilityItem */
         AvailabilityItem: {
@@ -454,6 +661,75 @@ export interface components {
             competition_name: string;
             /** Competition Code */
             competition_code: string;
+        };
+        /** DetectedContradiction */
+        DetectedContradiction: {
+            /** Code */
+            code: string;
+            /** Description */
+            description: string;
+            /** Agents */
+            agents: string[];
+            /** Severity */
+            severity: string;
+        };
+        /** FinalReportOut */
+        FinalReportOut: {
+            /** Id */
+            id: number;
+            /**
+             * Analysis Run Id
+             * Format: uuid
+             */
+            analysis_run_id: string;
+            match: components["schemas"]["MatchOut"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Generated By
+             * @enum {string}
+             */
+            generated_by: "ai" | "automatic";
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Summary */
+            summary: string;
+            /** Key Findings */
+            key_findings: {
+                [key: string]: string;
+            }[];
+            /** Agreements */
+            agreements: string[];
+            /** Contradictions */
+            contradictions: {
+                [key: string]: unknown;
+            }[];
+            /** Detected Contradictions */
+            detected_contradictions: components["schemas"]["DetectedContradiction"][];
+            /** Missing Information */
+            missing_information: string[];
+            /** Confidence */
+            confidence: string;
+            /** Agent Statuses */
+            agent_statuses: {
+                [key: string]: string;
+            };
+            /** Sources */
+            sources: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Data As Of
+             * Format: date-time
+             */
+            data_as_of: string;
+            /** Disclaimer */
+            disclaimer: string;
         };
         /** Finding */
         Finding: {
@@ -2074,6 +2350,174 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agents_api_v1_agents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentInfo"][];
+                };
+            };
+        };
+    };
+    list_analyses_api_v1_analyses_get: {
+        parameters: {
+            query?: {
+                match_id?: number | null;
+                /** @description Numero massimo di elementi */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_analysis_api_v1_analyses_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_analysis_api_v1_analyses__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_api_v1_analyses__run_id__report_md_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    usage_api_v1_ai_usage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIUsageOut"];
                 };
             };
         };

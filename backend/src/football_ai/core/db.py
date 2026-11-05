@@ -47,3 +47,8 @@ def check_database(engine: Engine | None = None) -> bool:
     except Exception:
         return False
     return True
+
+
+def get_session_factory() -> sessionmaker[Session]:
+    """FastAPI dependency for code that opens its own sessions (background work)."""
+    return get_sessionmaker()

@@ -2,6 +2,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 
 import { apiGet, apiPost, qs } from './client'
 import type {
+  AgentInfo,
+  AIUsage,
+  Analysis,
+  AnalysisSummary,
   Competition,
   MatchContext,
   MatchDetail,
@@ -147,6 +151,51 @@ export function useRunSimulation() {
     onSuccess: (sim) => {
       client.setQueryData(['simulation', sim.id], sim)
       void client.invalidateQueries({ queryKey: ['simulations'] })
+    },
+  })
+}
+
+export function useAgentCatalogue() {
+  return useQuery({
+    queryKey: ['agents'],
+    queryFn: ({ signal }) => apiGet<AgentInfo[]>('/agents', signal),
+    staleTime: Infinity,
+  })
+}
+
+export function useAIUsage() {
+  return useQuery({
+    queryKey: ['ai-usage'],
+    queryFn: ({ signal }) => apiGet<AIUsage>('/ai/usage', signal),
+  })
+}
+
+const ACTIVE = new Set(['queued', 'running'])
+
+export function useAnalysis(id: string | undefined) {
+  return useQuery({
+    queryKey: ['analysis', id],
+    queryFn: ({ signal }) => apiGet<Analysis>(`/analyses/${id}`, signal),
+    enabled: id !== undefined,
+    refetchInterval: (q) => (q.state.data && ACTIVE.has(q.state.data.status) ? 1500 : false),
+  })
+}
+
+export function useAnalyses(matchId?: number) {
+  return useQuery({
+    queryKey: ['analyses', matchId],
+    queryFn: ({ signal }) => apiGet<AnalysisSummary[]>(`/analyses${qs({ match_id: matchId, limit: 50 })}`, signal),
+  })
+}
+
+export function useStartAnalysis() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { match_id: number; force?: boolean }) => apiPost<Analysis>('/analyses', body),
+    onSuccess: (a) => {
+      client.setQueryData(['analysis', a.id], a)
+      void client.invalidateQueries({ queryKey: ['analyses'] })
+      void client.invalidateQueries({ queryKey: ['ai-usage'] })
     },
   })
 }

@@ -122,8 +122,11 @@ async def run_agent(
     ctx: MatchContext,
     *,
     analysis_run_id: uuid.UUID | None = None,
+    extra: dict[str, Any] | None = None,
 ) -> AgentReport:
-    extra = agent.prepare(session, ctx)
+    """Run ``agent``; ``extra`` lets the caller pass precomputed data (else ``prepare``)."""
+    if extra is None:
+        extra = agent.prepare(session, ctx)
     evidence = agent.build_evidence(ctx, extra)
     missing = agent.known_missing(ctx)
     key = make_cache_key(
