@@ -236,3 +236,104 @@ class PlayerMatchStats(IdMixin, TimestampMixin, ProvenanceMixin, Base):
     yellow_cards: Mapped[int | None] = mapped_column(SmallInteger)
     red_cards: Mapped[int | None] = mapped_column(SmallInteger)
     rating: Mapped[float | None] = mapped_column(Numeric(4, 2, asdecimal=False))
+
+
+class AvailabilityType(enum.StrEnum):
+    INJURY = "injury"
+    SUSPENSION = "suspension"
+    INTERNATIONAL_DUTY = "international_duty"
+    DOUBTFUL = "doubtful"
+    OTHER = "other"
+
+
+class AvailabilityStatus(enum.StrEnum):
+    ACTIVE = "active"
+    RESOLVED = "resolved"
+
+
+class LineupRole(enum.StrEnum):
+    STARTER = "starter"
+    SUBSTITUTE = "substitute"
+
+
+class SquadMembership(IdMixin, TimestampMixin, ProvenanceMixin, Base):
+    __tablename__ = "squad_memberships"
+    __table_args__ = (UniqueConstraint("player_id", "team_id", "season_id"),)
+
+    player_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("players.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    team_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("teams.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    season_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("seasons.id", ondelete="CASCADE"), nullable=False
+    )
+    shirt_number: Mapped[int | None] = mapped_column(SmallInteger)
+    from_date: Mapped[date | None] = mapped_column(Date)
+    to_date: Mapped[date | None] = mapped_column(Date)
+
+
+class Lineup(IdMixin, TimestampMixin, ProvenanceMixin, Base):
+    """A team's line-up for a match. ``confirmed`` distinguishes official from expected."""
+
+    __tablename__ = "lineups"
+    __table_args__ = (UniqueConstraint("match_id", "team_id"),)
+
+    match_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    team_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("teams.id", ondelete="RESTRICT"), nullable=False
+    )
+    formation: Mapped[str | None] = mapped_column(String(16))
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    announced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class LineupEntry(IdMixin, TimestampMixin, Base):
+    __tablename__ = "lineup_entries"
+    __table_args__ = (
+        UniqueConstraint("lineup_id", "player_id"),
+        CheckConstraint(
+            "(grid_x IS NULL OR (grid_x >= 0 AND grid_x <= 100))"
+            " AND (grid_y IS NULL OR (grid_y >= 0 AND grid_y <= 100))",
+            name="grid_range",
+        ),
+    )
+
+    lineup_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("lineups.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    player_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("players.id", ondelete="RESTRICT"), nullable=False
+    )
+    role: Mapped[LineupRole] = mapped_column(_enum(LineupRole, "lineup_role"), nullable=False)
+    position: Mapped[str | None] = mapped_column(String(32))
+    grid_x: Mapped[float | None] = mapped_column(Numeric(5, 2, asdecimal=False))
+    grid_y: Mapped[float | None] = mapped_column(Numeric(5, 2, asdecimal=False))
+    shirt_number: Mapped[int | None] = mapped_column(SmallInteger)
+
+
+class PlayerAvailability(IdMixin, TimestampMixin, ProvenanceMixin, Base):
+    """Injury / suspension / other absence, always with its report timestamp and source."""
+
+    __tablename__ = "player_availability"
+    __table_args__ = (Index("ix_player_availability_team_status", "team_id", "status"),)
+
+    player_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("players.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    team_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("teams.id", ondelete="CASCADE"), nullable=False
+    )
+    type: Mapped[AvailabilityType] = mapped_column(
+        _enum(AvailabilityType, "availability_type"), nullable=False
+    )
+    description: Mapped[str | None] = mapped_column(String(500))
+    reported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expected_return: Mapped[date | None] = mapped_column(Date)
+    source_url: Mapped[str | None] = mapped_column(String(500))
+    status: Mapped[AvailabilityStatus] = mapped_column(
+        _enum(AvailabilityStatus, "availability_status"), nullable=False
+    )

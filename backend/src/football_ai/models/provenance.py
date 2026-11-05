@@ -46,6 +46,7 @@ class DataSource(IdMixin, TimestampMixin, Base):
     license_url: Mapped[str | None] = mapped_column(String(500))
     attribution_text: Mapped[str | None] = mapped_column(Text)
     commercial_use_allowed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_synthetic: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
 
@@ -99,3 +100,20 @@ class ExternalRef(IdMixin, TimestampMixin, Base):
     entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
     external_id: Mapped[str] = mapped_column(String(128), nullable=False)
     internal_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+
+
+class ProviderCache(IdMixin, TimestampMixin, Base):
+    """Cached HTTP responses from external providers (avoids repeated API calls)."""
+
+    __tablename__ = "provider_cache"
+
+    source_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("data_sources.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    cache_key: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    status_code: Mapped[int] = mapped_column(Integer, nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    etag: Mapped[str | None] = mapped_column(String(200))
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -72,3 +72,39 @@ def db_session(db_engine: Engine) -> Iterator[Session]:
 @pytest.fixture
 def now() -> datetime:
     return datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+
+
+@pytest.fixture(scope="session")
+def seeded_engine(db_engine: Engine) -> Engine:
+    """Test database populated (committed) with the demo league and Serie A 2025/26."""
+    import asyncio
+
+    from football_ai.core.config import Settings
+    from football_ai.providers.registry import build_providers
+    from football_ai.services.ingestion import IngestionService
+
+    providers = build_providers(Settings(_env_file=None))  # type: ignore[call-arg]
+
+    async def run() -> None:
+        with Session(db_engine) as s:
+            svc = IngestionService(s)
+            await svc.ingest(providers["local_sample"], "DEMO", "2026/27")
+            await svc.ingest(providers["openfootball"], "SA", "2025/26")
+
+    asyncio.run(run())
+    return db_engine
+
+
+@pytest.fixture
+async def api_client(settings: Settings, seeded_engine: Engine) -> AsyncIterator[AsyncClient]:
+    from football_ai.core.db import get_session
+
+    app = create_app(settings)
+
+    def _session() -> Iterator[Session]:
+        with Session(seeded_engine) as s:
+            yield s
+
+    app.dependency_overrides[get_session] = _session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac

@@ -52,3 +52,6 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = ["db: test che richiedono PostgreSQL (TEST_DATABASE_URL)"]
+
+[project.scripts]
+football-ai = "football_ai.cli:main"

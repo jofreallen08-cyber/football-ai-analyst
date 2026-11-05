@@ -7,6 +7,7 @@ Secrets are typed as :class:`pydantic.SecretStr` so they never appear in
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Annotated, Literal
 
 from pydantic import Field, SecretStr, field_validator
@@ -42,7 +43,12 @@ class Settings(BaseSettings):
     ai_daily_token_limit: int = Field(default=500_000, ge=0)
     ai_max_calls_per_analysis: int = Field(default=5, ge=0, le=20)
 
-    # Data providers (used from Phase 2 / 7).
+    # Data providers.
+    data_dir: Path = Path(__file__).resolve().parents[3] / "data"
+    openfootball_mode: Literal["bundled", "remote"] = "bundled"
+    openfootball_base_url: str = (
+        "https://raw.githubusercontent.com/openfootball/football.json/master"
+    )
     football_data_org_api_key: SecretStr | None = None
 
     @field_validator("cors_origins", mode="before")

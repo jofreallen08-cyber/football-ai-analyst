@@ -25,12 +25,12 @@ pytestmark = pytest.mark.db
 
 
 def _seed(session: Session, now: datetime) -> tuple[DataSource, Season, Team, Team]:
-    src = DataSource(key="local_sample", name="Dati di esempio locali")
+    src = DataSource(key="constraint-test", name="Fonte per test dei vincoli")
     session.add(src)
     session.flush()
     prov = {"source_id": src.id, "fetched_at": now}
     comp = Competition(
-        name="Serie A", code="SA", country="Italia", type=CompetitionType.LEAGUE, **prov
+        name="Serie A", code="TST", country="Italia", type=CompetitionType.LEAGUE, **prov
     )
     session.add(comp)
     session.flush()

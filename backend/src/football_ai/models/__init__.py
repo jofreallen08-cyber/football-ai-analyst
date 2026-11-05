@@ -2,14 +2,21 @@
 
 from football_ai.models.base import Base
 from football_ai.models.football import (
+    AvailabilityStatus,
+    AvailabilityType,
     Competition,
     CompetitionType,
+    Lineup,
+    LineupEntry,
+    LineupRole,
     Match,
     MatchStatus,
     MatchTeamStats,
     Player,
+    PlayerAvailability,
     PlayerMatchStats,
     Season,
+    SquadMembership,
     Team,
     TeamAlias,
 )
@@ -20,9 +27,12 @@ from football_ai.models.provenance import (
     IngestionRun,
     IngestionStatus,
     IssueSeverity,
+    ProviderCache,
 )
 
 __all__ = [
+    "AvailabilityStatus",
+    "AvailabilityType",
     "Base",
     "Competition",
     "CompetitionType",
@@ -32,12 +42,18 @@ __all__ = [
     "IngestionRun",
     "IngestionStatus",
     "IssueSeverity",
+    "Lineup",
+    "LineupEntry",
+    "LineupRole",
     "Match",
     "MatchStatus",
     "MatchTeamStats",
     "Player",
+    "PlayerAvailability",
     "PlayerMatchStats",
+    "ProviderCache",
     "Season",
+    "SquadMembership",
     "Team",
     "TeamAlias",
 ]
