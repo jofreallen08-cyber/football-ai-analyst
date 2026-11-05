@@ -1,94 +1,103 @@
+import { Link } from 'react-router'
+
 import { useHealth } from '../api/health'
+import { useOverview } from '../api/queries'
+import { MatchRow } from '../components/domain/MatchRow'
+import { SyntheticBadge } from '../components/domain/SyntheticBadge'
 import { Card } from '../components/ui/Card'
-import { ErrorState } from '../components/ui/ErrorState'
+import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
-import { Skeleton } from '../components/ui/Skeleton'
+import { QueryState } from '../components/ui/QueryState'
+import { StatTile } from '../components/ui/StatTile'
 import { StatusDot } from '../components/ui/StatusDot'
-import { NAV_ITEMS } from '../lib/navigation'
+import { formatNumber } from '../lib/format'
 
-const COMPETITIONS = ['Serie A', 'Premier League', 'La Liga']
-
-const ENVIRONMENTS: Record<string, string> = {
-  development: 'sviluppo',
-  test: 'test',
-  production: 'produzione',
-}
+const ENVIRONMENTS: Record<string, string> = { development: 'sviluppo', test: 'test', production: 'produzione' }
 
 function SystemStatus() {
-  const { data, isPending, isError, error, refetch } = useHealth()
-
-  if (isPending) {
-    return (
-      <div className="space-y-3" data-testid="status-loading">
-        <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-4 w-3/5" />
-      </div>
-    )
-  }
-  if (isError) {
-    return (
-      <ErrorState
-        title="Backend non raggiungibile"
-        message={error.message}
-        onRetry={() => void refetch()}
-      />
-    )
-  }
-
-  const rows: [string, string, 'ok' | 'warn'][] = [
-    ['API', `v${data.version} · ${ENVIRONMENTS[data.environment] ?? data.environment}`, 'ok'],
-    ['Database', data.database === 'ok' ? 'Connesso' : 'Non disponibile', data.database === 'ok' ? 'ok' : 'warn'],
-    ['Fornitore AI', data.ai_provider === 'mock' ? 'Simulato (offline)' : data.ai_provider, 'ok'],
-  ]
+  const health = useHealth()
   return (
-    <dl className="divide-y divide-line">
-      {rows.map(([label, value, status]) => (
-        <div key={label} className="flex items-center justify-between py-2.5 text-sm">
-          <dt className="text-ink-muted">{label}</dt>
-          <dd className="flex items-center gap-2 font-medium">
-            <StatusDot status={status} />
-            {value}
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <QueryState query={health} rows={3}>
+      {(data) => {
+        const rows: [string, string, 'ok' | 'warn'][] = [
+          ['API', `v${data.version} · ${ENVIRONMENTS[data.environment] ?? data.environment}`, 'ok'],
+          ['Database', data.database === 'ok' ? 'Connesso' : 'Non disponibile', data.database === 'ok' ? 'ok' : 'warn'],
+          ['Fornitore AI', data.ai_provider === 'mock' ? 'Simulato (offline)' : data.ai_provider, 'ok'],
+        ]
+        return (
+          <dl className="divide-y divide-line">
+            {rows.map(([label, value, status]) => (
+              <div key={label} className="flex items-center justify-between py-2.5 text-sm">
+                <dt className="text-ink-muted">{label}</dt>
+                <dd className="flex items-center gap-2 font-medium">
+                  <StatusDot status={status} />
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }}
+    </QueryState>
   )
 }
 
 export function Overview() {
+  const overview = useOverview()
   return (
     <>
       <PageHeader
         title="Panoramica"
-        description="Piattaforma professionale di analisi calcistica con cinque agenti AI specializzati."
+        description="Analisi calcistica con dati verificati e cinque agenti AI specializzati."
       />
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <Card title="Stato del sistema">
-          <SystemStatus />
-        </Card>
-        <Card title="Competizioni iniziali">
-          <ul className="space-y-2 text-sm">
-            {COMPETITIONS.map((c) => (
-              <li key={c} className="flex items-center justify-between rounded-md bg-navy-850 px-3 py-2">
-                <span className="font-medium">{c}</span>
-                <span className="text-xs text-ink-faint">Dati in arrivo (Fase 2)</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-        <Card title="Sezioni" className="md:col-span-2 xl:col-span-1">
-          <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 xl:grid-cols-1">
-            {NAV_ITEMS.slice(1).map(({ path, label, icon: Icon, phase }) => (
-              <li key={path} className="flex items-center gap-2 text-ink-muted">
-                <Icon className="size-4 text-accent" aria-hidden="true" />
-                <span className="text-ink">{label}</span>
-                <span className="ml-auto text-xs text-ink-faint">Fase {phase}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
+      <QueryState query={overview} rows={6}>
+        {(data) => (
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <StatTile label="Competizioni" value={formatNumber(data.totals.competitions)} />
+              <StatTile label="Partite" value={formatNumber(data.totals.matches)} hint={`${formatNumber(data.totals.finished)} giocate`} />
+              <StatTile label="Squadre" value={formatNumber(data.totals.teams)} />
+              <StatTile label="Giocatori" value={formatNumber(data.totals.players)} hint="Solo fonti con dati individuali" />
+            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <Card title="Risultati recenti" action={<Link to="/partite" className="text-xs text-accent hover:underline">Tutte le partite</Link>}>
+                {data.recent.length ? (
+                  <div className="-mx-3">{data.recent.map((m) => <MatchRow key={m.id} match={m} showCompetition />)}</div>
+                ) : (
+                  <EmptyState title="Nessun risultato" message="Non ci sono partite terminate nei dati importati." />
+                )}
+              </Card>
+              <Card title="Prossime partite">
+                {data.upcoming.length ? (
+                  <div className="-mx-3">{data.upcoming.map((m) => <MatchRow key={m.id} match={m} showCompetition />)}</div>
+                ) : (
+                  <EmptyState title="Nessuna partita in programma" message="Le fonti importate non contengono partite future." />
+                )}
+              </Card>
+            </div>
+            <div className="grid gap-5 lg:grid-cols-[2fr_1fr]">
+              <Card title="Fonti dati">
+                <ul className="divide-y divide-line text-sm">
+                  {data.sources.map((s) => (
+                    <li key={s.key} className="py-2.5">
+                      <p className="flex items-center gap-2 font-medium">
+                        {s.name} {s.is_synthetic && <SyntheticBadge />}
+                      </p>
+                      <p className="text-xs text-ink-muted">{s.attribution_text}</p>
+                      <p className="text-xs text-ink-faint">
+                        Licenza: {s.license_url ? <a className="text-accent hover:underline" href={s.license_url} target="_blank" rel="noreferrer">{s.license_name}</a> : s.license_name}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+              <Card title="Stato del sistema">
+                <SystemStatus />
+              </Card>
+            </div>
+          </div>
+        )}
+      </QueryState>
     </>
   )
 }

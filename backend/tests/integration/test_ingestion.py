@@ -139,3 +139,30 @@ def test_seeded_demo_has_full_data(seeded_engine) -> None:
             .where(DataSource.key == "openfootball")
         )
         assert real_stats == 0  # results-only source: no statistics invented
+
+
+async def test_reingest_removes_player_stats_no_longer_in_source(db_session) -> None:
+    from football_ai.models import PlayerMatchStats
+    from football_ai.providers.base import PPlayer, PPlayerStats
+
+    def bundle(player_ids: list[str]) -> SeasonBundle:
+        b = _bundle(players=[PPlayer(external_id=p, full_name=p.upper()) for p in ("p1", "p2")])
+        m = b.matches[0]
+        b.matches[0] = m.model_copy(
+            update={
+                "player_stats": [
+                    PPlayerStats(player_external_id=p, team_external_id="a", minutes=90)
+                    for p in player_ids
+                ]
+            }
+        )
+        return b
+
+    svc = IngestionService(db_session)
+    await svc.ingest(FakeProvider(bundle(["p1", "p2"])), "FAKE", "2025/26")
+    await svc.ingest(FakeProvider(bundle(["p1"])), "FAKE", "2025/26")
+    src = db_session.scalar(select(DataSource).where(DataSource.key == "fake"))
+    rows = db_session.scalars(
+        select(PlayerMatchStats).where(PlayerMatchStats.source_id == src.id)
+    ).all()
+    assert len(rows) == 1

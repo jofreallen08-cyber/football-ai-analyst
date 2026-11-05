@@ -27,6 +27,18 @@ export class ApiError extends Error {
   }
 }
 
+type QueryValue = string | number | boolean | null | undefined
+
+/** Build a query string, skipping empty values. */
+export function qs(params: Record<string, QueryValue>): string {
+  const sp = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== '') sp.set(k, String(v))
+  }
+  const out = sp.toString()
+  return out ? `?${out}` : ''
+}
+
 export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
   let response: Response
   try {

@@ -197,13 +197,25 @@ def r2(x: float) -> float:
 
 
 def round_robin(n: int) -> list[list[tuple[int, int]]]:
+    """Double round robin (circle method) with balanced home/away venues.
+
+    Orientation is chosen greedily: the team with fewer home games hosts; ties go to
+    the team that played away in the previous round. The second half mirrors the first.
+    """
     teams = list(range(n))
+    homes = [0] * n
+    last_home = [False] * n
     rounds = []
-    for r in range(n - 1):
+    for _ in range(n - 1):
         pairs = []
         for i in range(n // 2):
             a, b = teams[i], teams[n - 1 - i]
-            pairs.append((a, b) if (r + i) % 2 == 0 else (b, a))
+            key_a = (homes[a], last_home[a], a)
+            key_b = (homes[b], last_home[b], b)
+            h, aw = (a, b) if key_a <= key_b else (b, a)
+            homes[h] += 1
+            last_home[h], last_home[aw] = True, False
+            pairs.append((h, aw))
         rounds.append(pairs)
         teams = [teams[0], teams[-1], *teams[1:-1]]
     return rounds + [[(b, a) for a, b in rnd] for rnd in rounds]

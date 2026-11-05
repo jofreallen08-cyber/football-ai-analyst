@@ -3,25 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { NAV_ITEMS } from './lib/navigation'
+import { health, mockApi } from './test/mockApi'
 import { renderApp } from './test/render'
-
-const healthy = {
-  status: 'ok',
-  version: '0.1.0',
-  environment: 'test',
-  database: 'ok',
-  ai_provider: 'mock',
-}
-
-function mockFetch(impl: () => Promise<Response>) {
-  vi.stubGlobal('fetch', vi.fn(impl))
-}
-
-function jsonResponse(body: unknown, status = 200) {
-  return Promise.resolve(
-    new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }),
-  )
-}
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -29,7 +12,7 @@ afterEach(() => {
 
 describe('App shell', () => {
   it('shows all eight sections in the sidebar', () => {
-    mockFetch(() => jsonResponse(healthy))
+    mockApi()
     renderApp()
     const nav = screen.getByRole('navigation', { name: 'Navigazione principale' })
     for (const item of NAV_ITEMS) {
@@ -38,47 +21,38 @@ describe('App shell', () => {
   })
 
   it.each(NAV_ITEMS)('renders the $label page', ({ path, label }) => {
-    mockFetch(() => jsonResponse(healthy))
+    mockApi()
     renderApp(path)
     expect(screen.getByRole('heading', { level: 1, name: label })).toBeInTheDocument()
   })
 
   it('labels the simulation lab as simulation', () => {
-    mockFetch(() => jsonResponse(healthy))
+    mockApi()
     renderApp('/simulazioni')
     expect(screen.getByRole('note')).toHaveTextContent('SIMULAZIONE')
   })
 
   it('renders a 404 page for unknown routes', () => {
-    mockFetch(() => jsonResponse(healthy))
+    mockApi()
     renderApp('/non-esiste')
     expect(screen.getByText('Pagina non trovata')).toBeInTheDocument()
   })
 
-  it('shows system status when the backend is healthy', async () => {
-    mockFetch(() => jsonResponse(healthy))
-    renderApp('/')
-    expect(await screen.findByText('Connesso')).toBeInTheDocument()
-    expect(screen.getByText('Simulato (offline)')).toBeInTheDocument()
-    expect(screen.getByText('Sistema operativo')).toBeInTheDocument()
-  })
-
   it('shows an error state with retry when the backend is unreachable', async () => {
-    mockFetch(() => Promise.reject(new TypeError('network')))
+    mockApi({ '/overview': new TypeError('network'), '/health': new TypeError('network') })
     renderApp('/')
-    const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('Impossibile contattare il server.')
-    expect(screen.getByText('Server non raggiungibile')).toBeInTheDocument()
+    const alerts = await screen.findAllByRole('alert')
+    expect(alerts[0]).toHaveTextContent('Impossibile contattare il server.')
+    expect(await screen.findByText('Server non raggiungibile')).toBeInTheDocument()
 
-    mockFetch(() => jsonResponse(healthy))
-    await userEvent.click(within(alert).getByRole('button', { name: 'Riprova' }))
-    expect(await screen.findByText('Connesso')).toBeInTheDocument()
+    mockApi()
+    await userEvent.click(within(alerts[0]!).getByRole('button', { name: 'Riprova' }))
+    expect(await screen.findByText('Risultati recenti')).toBeInTheDocument()
   })
 
   it('warns when the database is unavailable', async () => {
-    mockFetch(() => jsonResponse({ ...healthy, status: 'degraded', database: 'unavailable' }))
+    mockApi({ '/health': { ...health, status: 'degraded', database: 'unavailable' } })
     renderApp('/')
-    expect(await screen.findByText('Non disponibile')).toBeInTheDocument()
-    expect(screen.getByText('Database non disponibile')).toBeInTheDocument()
+    expect(await screen.findByText('Database non disponibile')).toBeInTheDocument()
   })
 })

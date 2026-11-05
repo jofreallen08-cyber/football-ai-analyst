@@ -377,6 +377,13 @@ class _BundleWriter:
                 vals = {f: getattr(ps, f) for f in PLAYER_STAT_FIELDS}
                 vals["team_id"] = tid
                 self._apply(prow, vals)
+            # The source's latest data replaces older rows for this match.
+            incoming = {self._ref("player", ps.player_external_id) for ps in m.player_stats} - {
+                None
+            }
+            for pid, stale in existing.items():
+                if pid not in incoming and stale.source_id == self.source_id:
+                    self.s.delete(stale)
 
         for lu in m.lineups:
             tid = self._ref("team", lu.team_external_id)

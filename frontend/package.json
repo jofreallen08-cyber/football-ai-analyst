@@ -10,7 +10,8 @@
     "lint": "oxlint src",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:api": "cd ../backend && uv run python scripts/export_openapi.py && cd ../frontend && pnpm dlx --package openapi-typescript@7.13.0 --package typescript@5.9.3 openapi-typescript src/api/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.106.1",
